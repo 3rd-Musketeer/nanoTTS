@@ -3,8 +3,8 @@
 > **Minimalist Text-to-Speech for Python**  
 > Zero-config streaming TTS with async support
 
-[![CI](https://github.com/user/nanotts/workflows/CI/badge.svg)](https://github.com/user/nanotts/actions)
-[![Coverage](https://codecov.io/gh/user/nanotts/branch/main/graph/badge.svg)](https://codecov.io/gh/user/nanotts)
+[![CI](https://github.com/3rd-Musketeer/nanoTTS/actions/workflows/ci.yml/badge.svg)](https://github.com/3rd-Musketeer/nanoTTS/actions)
+[![Coverage](https://codecov.io/gh/3rd-Musketeer/nanoTTS/branch/main/graph/badge.svg)](https://codecov.io/gh/3rd-Musketeer/nanoTTS)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
 ## What is nanoTTS?
@@ -172,8 +172,8 @@ Want to try the full experience? Run our interactive demo:
 
 ```bash
 # Clone and run the demo
-git clone https://github.com/user/nanotts
-cd nanotts
+git clone https://github.com/3rd-Musketeer/nanoTTS
+cd nanoTTS
 uv run demo/interactive_demo.py
 ```
 
@@ -357,8 +357,8 @@ We love contributions! nanoTTS follows the **nano philosophy**:
 
 ```bash
 # Development setup
-git clone https://github.com/user/nanotts
-cd nanotts
+git clone https://github.com/3rd-Musketeer/nanoTTS
+cd nanoTTS
 uv sync --group dev
 
 # Run the full test suite
@@ -381,4 +381,4 @@ MIT License - see [LICENSE](LICENSE) file.
 
 nanoTTS: **Tiny library, huge possibilities**
 
-Questions? Issues? [Open a GitHub issue](https://github.com/user/nanotts/issues) or start a [discussion](https://github.com/user/nanotts/discussions)!
+Questions? Issues? [Open a GitHub issue](https://github.com/3rd-Musketeer/nanoTTS/issues) or start a [discussion](https://github.com/3rd-Musketeer/nanoTTS/discussions)!
