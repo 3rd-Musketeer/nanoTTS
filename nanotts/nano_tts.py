@@ -19,7 +19,8 @@ class NanoTTS:
         model: str | None = None,
         output_spec: AudioSpec | None = None,
         timeout_ms: int = 800,
-        max_len: int = 120,
+        min_tokens: int = 10,
+        max_tokens: int = 50,
         pre_hook: Callable[[str], Awaitable[str]] | None = None,
         **engine_kwargs,
     ):
@@ -34,7 +35,8 @@ class NanoTTS:
         self._engine_kwargs = engine_kwargs
         self._output_spec = output_spec or AudioSpec("pcm", 16000, 1, 16)
         self._timeout_ms = timeout_ms
-        self._max_len = max_len
+        self._min_tokens = min_tokens
+        self._max_tokens = max_tokens
         self._pre_hook = pre_hook
         self._token: StreamToken | None = None
 
@@ -74,7 +76,8 @@ class NanoTTS:
                 send_stream,
                 pre_hook=self._pre_hook,
                 timeout_ms=self._timeout_ms,
-                max_len=self._max_len,
+                min_tokens=self._min_tokens,
+                max_tokens=self._max_tokens,
                 token=self._token,
             )
             await segmenter.feed(text_or_iter)

@@ -2,9 +2,12 @@
 """
 Self-contained Interactive TTS Demo with LLM Integration
 
+Features tiktoken-based intelligent segmentation that preserves abbreviations
+like "Ph.D." and maintains proper spacing during token-feeding synthesis.
+
 Commands:
 - /mode: Switch between token-feeding and full-text synthesis modes
-- /verbose: Toggle verbose output showing segmentation results
+- /verbose: Toggle verbose output showing segmentation results (with token counts)
 - /audio: Toggle audio playback on/off
 - /language: Switch between English and Chinese voices
 - /performance: Benchmark last response across all modes
@@ -33,6 +36,7 @@ from rich.panel import Panel
 from rich.table import Table
 import sounddevice as sd
 import soundfile as sf
+import tiktoken
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from nanotts import AudioChunk, AudioSpec, NanoTTS
@@ -125,6 +129,9 @@ class InteractiveDemo:
             "zh": "zh-CN-XiaoxiaoNeural",  # Mainland Chinese
         }
 
+        # Initialize tiktoken encoder for token counting
+        self.encoder = tiktoken.get_encoding("cl100k_base")
+
     def load_config(self) -> bool:
         """Load API configuration from .env file."""
         load_dotenv()
@@ -143,17 +150,26 @@ class InteractiveDemo:
 
         # Initialize TTS
         try:
-            voice = self.voices[self.language]
-            self.tts = NanoTTS(model="edge", voice=voice)
-            lang_name = (
-                "English (Australian)"
-                if self.language == "en"
-                else "Chinese (Mainland)"
-            )
-            self.console.print(
-                f"[green]✓ Using Edge-TTS engine ({lang_name} voice)[/green]"
-            )
-        except (ValueError, ImportError):
+            # Check if edge model is available first
+            from nanotts.model import manager
+
+            models = manager.list_models()
+
+            if "edge" in models:
+                voice = self.voices[self.language]
+                self.tts = NanoTTS(model="edge", voice=voice)
+                lang_name = (
+                    "English (Australian)"
+                    if self.language == "en"
+                    else "Chinese (Mainland)"
+                )
+                self.console.print(
+                    f"[green]✓ Using Edge-TTS engine ({lang_name} voice)[/green]"
+                )
+            else:
+                raise ValueError("Edge model not available")
+
+        except (ValueError, ImportError, KeyError, Exception):
             self.tts = NanoTTS(model="dummy")
             self.console.print(
                 "[yellow]⚠ Using dummy engine (install edge-tts for real synthesis)[/yellow]"
@@ -167,7 +183,7 @@ class InteractiveDemo:
         """Display command cheatsheet."""
         commands = [
             ("/mode", "Switch synthesis mode (token-feeding ↔ full-text)"),
-            ("/verbose", "Toggle verbose segmentation output"),
+            ("/verbose", "Toggle verbose segmentation output (shows token counts)"),
             ("/audio", "Toggle audio playback on/off"),
             ("/language", "Switch between English (🇦🇺) and Chinese (🇨🇳) voices"),
             ("/performance", "Benchmark last response across all modes"),
@@ -216,8 +232,9 @@ class InteractiveDemo:
     async def play_and_log(self, chunk: AudioChunk, text: str, segment_num: int):
         """Play audio and log if verbose."""
         if self.verbose:
+            token_count = len(self.encoder.encode(text))
             self.console.print(
-                f'[dim]Segment {segment_num}: "{text}" ({len(text)} chars, {len(chunk.data)} bytes)[/dim]'
+                f'[dim]Segment {segment_num}: "{text}" ({token_count} tokens, {len(chunk.data)} bytes)[/dim]'
             )
 
         if self.audio_enabled:
@@ -282,8 +299,9 @@ class InteractiveDemo:
         total_time = time.perf_counter() - start_time
 
         if self.verbose:
+            token_count = len(self.encoder.encode(text))
             self.console.print(
-                f'[dim]Raw synthesis: "{text}" → {len(chunk.data)} bytes[/dim]'
+                f'[dim]Raw synthesis: "{text}" ({token_count} tokens) → {len(chunk.data)} bytes[/dim]'
             )
 
         await self.play_and_log(chunk, text, 1)
@@ -302,8 +320,17 @@ class InteractiveDemo:
             )
             return
 
+        # Show both character and token info for the test
+        response_preview = self.last_response[:50] + (
+            "..." if len(self.last_response) > 50 else ""
+        )
+        total_tokens = len(self.encoder.encode(self.last_response))
         self.console.print(
-            Panel(f'Testing: "{self.last_response[:50]}..."', title="Performance Test")
+            Panel(
+                f'Testing: "{response_preview}"\n'
+                f"Full text: {len(self.last_response)} chars, {total_tokens} tokens",
+                title="Performance Test",
+            )
         )
 
         # Simulate token stream
@@ -344,20 +371,27 @@ class InteractiveDemo:
         self.language = "zh" if self.language == "en" else "en"
 
         try:
-            # Reinitialize TTS with new voice
-            voice = self.voices[self.language]
-            self.tts = NanoTTS(model="edge", voice=voice)
+            # Check if edge model is available first
+            from nanotts.model import manager
 
-            lang_name = (
-                "English (Australian)"
-                if self.language == "en"
-                else "Chinese (Mainland)"
-            )
-            self.console.print(
-                f"[green]🌐 Switched to {lang_name} voice: {voice}[/green]"
-            )
+            models = manager.list_models()
 
-        except (ValueError, ImportError):
+            if "edge" in models:
+                voice = self.voices[self.language]
+                self.tts = NanoTTS(model="edge", voice=voice)
+
+                lang_name = (
+                    "English (Australian)"
+                    if self.language == "en"
+                    else "Chinese (Mainland)"
+                )
+                self.console.print(
+                    f"[green]🌐 Switched to {lang_name} voice: {voice}[/green]"
+                )
+            else:
+                raise ValueError("Edge model not available")
+
+        except (ValueError, ImportError, KeyError, Exception):
             # Fallback to dummy if edge-tts not available
             self.tts = NanoTTS(model="dummy")
             lang_name = "English" if self.language == "en" else "Chinese"
