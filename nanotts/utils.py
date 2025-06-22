@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 import unicodedata
 
-
 # Markdown cleaning patterns
 MARKDOWN_PATTERNS = [
     (re.compile(r"\*\*([^*]+)\*\*"), r"\1"),  # **bold** → text

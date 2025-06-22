@@ -148,14 +148,12 @@ class Segmenter:
             return
 
         # Tiered approach: try Tier 1 first if we have minimum tokens
-        if current_tokens >= self._min_tokens:
-            if await self._try_segment_at_tier(TIER1_SEPARATORS):
-                return
+        if current_tokens >= self._min_tokens and await self._try_segment_at_tier(TIER1_SEPARATORS):
+            return
 
         # If approaching max tokens but Tier 1 failed, try Tier 2
-        if current_tokens >= self._max_tokens * 0.8:  # 80% of max tokens
-            if await self._try_segment_at_tier(TIER2_SEPARATORS):
-                return
+        if current_tokens >= self._max_tokens * 0.8 and await self._try_segment_at_tier(TIER2_SEPARATORS):
+            return
 
     async def _try_segment_at_tier(self, pattern: re.Pattern) -> bool:
         """Try to segment using the given separator pattern. Returns True if segmented."""
