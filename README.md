@@ -9,7 +9,7 @@
 
 ## What is nanoTTS?
 
-nanoTTS is a **tiny, powerful TTS library** that just works. No complex configs, no heavyweight dependencies—just clean async streaming with smart text segmentation.
+nanoTTS is a **tiny, powerful TTS library** that just works. No complex configs, no heavyweight dependencies—just clean async streaming with tiktoken-based intelligent segmentation.
 
 ```python
 from nanotts import NanoTTS
@@ -95,11 +95,11 @@ import asyncio
 from nanotts import NanoTTS
 
 async def segmentation_demo():
-    tts = NanoTTS(model="dummy", max_len=20)  # Force short segments
+    tts = NanoTTS(model="dummy", min_tokens=5, max_tokens=20)  # Force short segments
     
     long_text = """
-    This is a long text that will be automatically segmented. 
-    The system intelligently breaks at sentence boundaries, 
+    This is a long text that will be automatically segmented using tiktoken. 
+    The system intelligently breaks at sentence boundaries first, then commas, 
     respecting punctuation and word boundaries for natural speech flow.
     """
     
@@ -279,14 +279,15 @@ manager.register("my-engine", build_my_engine, "My custom TTS engine")
 ```python
 tts = NanoTTS(
     model="edge",
-    max_len=50,        # Max chars per segment
+    min_tokens=10,     # Minimum tokens per segment
+    max_tokens=50,     # Maximum tokens per segment
     timeout_ms=1000,   # Max wait time for more text
 )
 
-# Custom punctuation breaking
-async for chunk, text in tts.stream("Custom。Breaking！Rules？"):
-    # Breaks at punctuation automatically
-    pass
+# Tiered punctuation breaking: sentences first, then commas
+async for chunk, text in tts.stream("Dr. Smith has a Ph.D. However, students often struggle, but eventually succeed!"):
+    # Breaks at strong punctuation (.) first, commas as fallback
+    print(f"Segment: {text}")
 ```
 
 ---
@@ -317,7 +318,8 @@ uv sync --group dev
 ```python
 NanoTTS(
     model: str = "dummy",           # Engine to use
-    max_len: int = 100,             # Max chars per segment  
+    min_tokens: int = 10,           # Minimum tokens per segment
+    max_tokens: int = 50,           # Maximum tokens per segment  
     timeout_ms: int = 800,          # Timeout for streaming
     output_format: AudioSpec = ..., # Audio format
     **engine_kwargs                 # Engine-specific options
