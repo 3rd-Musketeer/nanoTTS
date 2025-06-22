@@ -10,7 +10,7 @@ import anyio
 STRONG_PUNCT = re.compile(r"[。！？!?…\.,，]")
 
 
-@dataclass(slots=True)
+@dataclass
 class Segment:
     id: int
     text: str

@@ -6,7 +6,7 @@ import shutil
 import anyio
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class AudioSpec:
     """Audio format specification."""
 
@@ -16,7 +16,7 @@ class AudioSpec:
     sample_width: int | None = None
 
 
-@dataclass(slots=True)
+@dataclass
 class AudioChunk:
     """Audio data with format specification."""
 

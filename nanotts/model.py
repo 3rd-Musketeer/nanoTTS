@@ -11,7 +11,7 @@ from .engine import Engine
 CACHE_DIR = Path.home() / ".cache" / "nano_tts"
 
 
-@dataclass(slots=True)
+@dataclass
 class EngineFactory:
     build: Callable[..., Awaitable[Engine]]
     doc: str
