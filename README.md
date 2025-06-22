@@ -295,18 +295,19 @@ async for chunk, text in tts.stream("Dr. Smith has a Ph.D. However, students oft
 ## Testing & Development
 
 ```bash
+# Development setup (one-time)
+uv sync --group dev
+uv run pre-commit install  # Auto-format on every commit
+
 # Run tests
 uv run pytest
 
 # Check coverage  
 uv run pytest --cov=nanotts
 
-# Lint code
-uv run ruff check .
+# Manual formatting (optional - pre-commit handles this)
+uv run ruff check . --fix
 uv run ruff format .
-
-# Install in development mode
-uv sync --group dev
 ```
 
 ---
@@ -356,6 +357,7 @@ We love contributions! nanoTTS follows the **nano philosophy**:
 2. **Stay lightweight** - Minimal dependencies  
 3. **Test everything** - 85%+ coverage required
 4. **Document clearly** - Code should be self-explaining
+5. **Automate the boring stuff** - Pre-commit hooks handle formatting automatically
 
 ```bash
 # Development setup

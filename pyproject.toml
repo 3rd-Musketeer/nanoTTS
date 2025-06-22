@@ -19,6 +19,7 @@ dev = [
     "coverage>=7.9.1",
     "ffmpeg-python>=0.2.0",
     "openai>=1.90.0",
+    "pre-commit>=4.0.0",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
     "pytest-cov>=6.2.1",
