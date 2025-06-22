@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+        enable-cache: true
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        uv sync --group dev
+        uv pip install --system ffmpeg-python
+    
+    - name: Install ffmpeg
+      run: sudo apt-get update && sudo apt-get install -y ffmpeg
+    
+    - name: Run linting
+      run: uv run ruff check .
+    
+    - name: Run formatting check
+      run: uv run ruff format --check .
+    
+    - name: Run tests with coverage
+      run: uv run pytest tests/ --cov=nanotts --cov-report=xml --cov-report=term-missing
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  test-minimal:
+    name: Test minimal dependencies 
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
+    
+    - name: Set up Python 3.9
+      run: uv python install 3.9
+    
+    - name: Install minimal dependencies only
+      run: uv sync --no-group dev
+    
+    - name: Test core functionality without dev dependencies
+      run: |
+        uv run python -c "
+        import nanotts
+        from nanotts import NanoTTS, AudioSpec, AudioChunk
+        print('✓ Core imports work')
+        
+        # Test basic functionality
+        import asyncio
+        async def test():
+            tts = NanoTTS(model='dummy')
+            async for chunk, text in tts.stream('test'):
+                assert isinstance(chunk, AudioChunk)
+                break
+            print('✓ Basic TTS functionality works')
+        
+        asyncio.run(test())
+        "

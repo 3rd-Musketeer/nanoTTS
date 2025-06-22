@@ -1,0 +1,115 @@
+[project]
+name = "nanotts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "anyio>=4.9.0",
+]
+
+[project.optional-dependencies]
+edge = [
+    "edge-tts>=7.0.2",
+]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.9.1",
+    "ffmpeg-python>=0.2.0",
+    "openai>=1.90.0",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.2.1",
+    "python-dotenv>=1.1.0",
+    "rich>=14.0.0",
+    "ruff>=0.12.0",
+    "sounddevice>=0.5.2",
+    "soundfile>=0.13.1",
+]
+
+[tool.ruff]
+# Set line length to 88 (Black-compatible)
+line-length = 88
+indent-width = 4
+
+# Target Python 3.9+ (minimum supported version)
+target-version = "py39"
+
+# Include Python files and notebooks
+include = ["*.py", "*.pyi", "*.ipynb"]
+
+# Exclude common paths
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "htmlcov",
+    ".pytest_cache",
+]
+
+[tool.ruff.lint]
+# Enable core rule sets
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings  
+    "F",     # pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "A",     # flake8-builtins
+    "C4",    # flake8-comprehensions
+    "T20",   # flake8-print
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "RUF",   # Ruff-specific rules
+]
+
+# Disable specific rules that may be too strict for this project
+ignore = [
+    "E501",   # Line too long (handled by formatter)
+    "T201",   # Allow print statements (useful for demos)
+    "A003",   # Allow class attribute shadowing builtins (e.g., format)
+    "ARG002", # Allow unused method arguments (common in interfaces)
+    "N806",   # Allow non-lowercase variable names in functions (for AudioSpec fields)
+    "N818",   # Allow non-Error suffix for exceptions (UnsupportedFormat is clear)
+    "TC003",  # Allow imports outside TYPE_CHECKING for runtime use
+    "TC001",  # Allow imports outside TYPE_CHECKING for runtime use
+    "UP007",  # Allow Union syntax for Python 3.9 compatibility
+    "F401",   # Allow unused imports in __init__.py for re-exports
+    "SIM105", # Allow try/except instead of contextlib.suppress for clarity
+    "B007",   # Allow unused loop variables in tests
+    "RUF001", # Allow ambiguous unicode characters in test strings
+    "ARG001", # Allow unused function arguments (for plugin factories)
+    "SIM117", # Allow nested with statements for clarity
+    "B020",   # Allow loop variable reuse (common in tests)
+    "RUF100", # Allow noqa comments
+]
+
+# Allow unfixable violations
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Allow print statements and asserts in tests
+"tests/**/*.py" = ["T201", "S101"]
+# Allow print statements in demo
+"demo/**/*.py" = ["T201"]
+
+[tool.ruff.lint.isort]
+# Configure import sorting
+split-on-trailing-comma = true
+force-single-line = false
+force-sort-within-sections = true
+known-first-party = ["nanotts"]
+
+[tool.ruff.format]
+# Use Black-compatible formatting
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
